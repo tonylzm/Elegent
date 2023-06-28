@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+	<style type="text/css">
+	body, html,
+    #map {
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        font-family: "微软雅黑";
+    }
+    .round_icon{ 
+        width: 34px;
+        height: 34px;
+        display: flex;
+        border-radius: 50%;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+    /* Sidebar styles */
+    .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            height: 100%;
+            background-color: #f1f1f1;
+            overflow-x: hidden;
+            padding-top: 20px;
+        }
+
+        /* Sidebar links */
+        .sidebar a {
+            display: block;
+            color: black;
+            padding: 16px;
+            text-decoration: none;
+        }
+
+        /* Active/current link */
+        .sidebar a.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        /* Sidebar header */
+        .sidebar .header {
+            background-color: #555;
+            color: white;
+            font-size: 20px;
+            padding: 16px;
+        }
+
+        /* Content */
+        .content {
+            margin-left: 250px;
+            padding: 16px;
+        }
+
+        /* Toggle button */
+        .toggle-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 30px;
+            cursor: pointer;
+            color: #555;
+        }
+
+        /* Animation */
+        @keyframes slide-in {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(0); }
+        }
+
+        @keyframes slide-out {
+            from { transform: translateX(0); }
+            to { transform: translateX(-100%); }
+        }
+
+        .slide-in {
+            animation: slide-in 0.5s forwards;
+        }
+
+        .slide-out {
+            animation: slide-out 0.5s forwards;
+        }
+	</style>
+	<script type="text/javascript" src="https://api.map.baidu.com/api?type=webgl&v=1.0&ak=VxXMwTrk3B9lrfDkxRFRvnvUXx1Wq1cy"></script>
+	<title>地图展示</title>
+</head>
+<body>
+	<div id="map"></div>
+    <div class="sidebar">
+        <div class="header"><img src="C:\Users\gaox\Pictures\头像\1.JPG" class="round_icon">欢迎您，高翔！</div>
+        <a href="#" class="active">拼团</a>
+        <a href="#">我的活动</a>
+        <a href="#">项目邀请</a>
+    </div>
+
+    <div class="content">
+        <h1>Welcome to Google Earth</h1>
+        <p>Explore the world from your computer with Google Earth.</p>
+    </div>
+
+    <div class="toggle-btn">&#9776;</div>
+
+    <script>
+        // Toggle sidebar
+        var toggleBtn = document.querySelector('.toggle-btn');
+        var sidebar = document.querySelector('.sidebar');
+        var content = document.querySelector('.content');
+
+        toggleBtn.addEventListener('click', function() {
+            if (sidebar.classList.contains('slide-in')) {
+                sidebar.classList.remove('slide-in');
+                sidebar.classList.add('slide-out');
+                content.style.marginLeft = '0';
+            } else {
+                sidebar.classList.remove('slide-out');
+                sidebar.classList.add('slide-in');
+                content.style.marginLeft = '250px';
+            }
+        });
+    </script>
+</body>
+</html>
+<script type="text/javascript">
+    // GL版命名空间为BMapGL
+    // 按住鼠标右键，修改倾斜角和角度
+	var map = new BMapGL.Map("map");    // 创建Map实例
+	map.centerAndZoom('苏州市', 12);  // 初始化地图,设置中心点坐标和地图级别
+	map.enableScrollWheelZoom(true);     //开启鼠标滚轮缩放
+    var scaleCtrl = new BMapGL.ScaleControl();  // 添加比例尺控件
+    map.addControl(scaleCtrl);
+    var navi3DCtrl = new BMapGL.NavigationControl3D();  // 添加3D控件
+    map.addControl(navi3DCtrl);
+    //新增事件
+    map.addEventListener('ondblclick', function (e) {
+        // 创建点标记
+        var point = new BMapGL.Point(e.latlng.lng, e.latlng.lat);
+        var marker = new BMapGL.Marker(point);
+        // 添加点标记
+        map.addOverlay(marker);
+        // 创建信息窗口
+        var opts = {
+            width: 200,
+            height: 100,
+            title: '垃圾分类志愿者'
+        };
+        // 右键删除点标记
+        marker.addEventListener('rightclick', function() {
+            map.removeOverlay(marker);
+        });
+        var infoWindow = new BMapGL.InfoWindow('地址：苏州科技大学石湖校区东区', opts);
+        // 点标记添加点击事件
+        marker.addEventListener('click', function() {
+            map.openInfoWindow(infoWindow, point); // 开启信息窗口
+        });
+    });
+    
+</script>
