@@ -1,0 +1,34 @@
+CREATE TABLE Member (
+  member_id INT PRIMARY KEY,
+  team_id INT,
+  member_name VARCHAR(255)
+);
+CREATE TABLE Team (
+  team_id INT PRIMARY KEY,
+  team_name VARCHAR(255),
+  leader_id INT,
+  FOREIGN KEY (leader_id) REFERENCES Member(member_id)
+);
+CREATE TABLE Activity (
+  activity_id INT PRIMARY KEY,
+  team_id INT,
+  start_time DATETIME,
+  activity_details VARCHAR(255),
+  FOREIGN KEY (team_id) REFERENCES Team(team_id)
+);
+
+CREATE TABLE Expense (
+  expense_id INT PRIMARY KEY,
+  activity_id INT,
+  member_id INT,
+  amount DECIMAL(10, 2),
+  FOREIGN KEY (activity_id) REFERENCES Activity(activity_id),
+  FOREIGN KEY (member_id) REFERENCES Member(member_id)
+);
+CREATE TABLE User (
+  user_id INT PRIMARY KEY,
+  account VARCHAR(255),
+  password VARCHAR(255),
+  username VARCHAR(255),
+  avatar BLOB
+);
