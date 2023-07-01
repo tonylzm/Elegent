@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+  <title>登录</title>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <style>
+    body {
+      background-image: linear-gradient(180deg, #49fbab 0%, #1ba8ff 100%);
+    }
+
+    .login-page {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .login-title {
+      font-size: 20px;
+    }
+
+    .box-card {
+      width: 375px;
+    }
+
+    .reg-bar {
+      width: 360px;
+      margin: 20px auto 0;
+      font-size: 14px;
+      overflow: hidden;
+    }
+
+    .reg-bar a {
+      color: #000000;
+      text-decoration: none;
+    }
+
+    .reg-bar a:hover {
+      text-decoration: underline;
+    }
+
+    .reg-bar .reg {
+      float: left;
+    }
+  </style>
+</head>
+
+<body>
+<div id="app">
+  <div class="login-page">
+    <el-card class="box-card">
+      <div slot="header" class="clearfix">
+        <span class="login-title">登录</span>
+      </div>
+      <div class="login-form">
+        <el-form :model="form" :rules="loginRules" ref="loginForm">
+          <el-form-item prop="account">
+            <el-input type="text" v-model="form.account" auto-complete="off" placeholder="请输入账号">
+              <template slot="prepend"><i style="font-size:20px" class="el-icon-user"></i></template>
+            </el-input>
+          </el-form-item>
+          <el-form-item prop="password">
+            <el-input type="password" v-model="form.password" auto-complete="off" placeholder="请输入密码">
+              <template slot="prepend"><i style="font-size:20px" class="el-icon-key"></i></template>
+            </el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button style="width: 210px;;" type="primary" @click="handleLogin" :loading="loading">登录
+            </el-button>
+
+            <el-button style="width: 110px;;">注册</el-button>
+          </el-form-item>
+
+        </el-form>
+      </div>
+    </el-card>
+  </div>
+</div>
+
+
+</body>
+
+<script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://unpkg.com/qs@6.11.1/dist/qs.js"></script>
+
+<script>
+
+</script>
+<script>
+
+  new Vue({
+            el: '#app',
+            data: {
+              loading: false,
+              form: {
+                username: '',
+                password: ''
+              },
+              loginRules: {
+                acccount: [
+                  { required: true, message: '请输入账户', trigger: 'blur' },
+                ],
+                password: [
+                  { required: true, message: '请输入密码', trigger: 'blur' }
+                ]
+              },
+            },
+            //方法中保留判断对错和登录
+    methods: {
+      handleLogin() {
+        // 解密密码
+        const decryptedPassword = decryptPassword(this.form.password);
+
+        // 发起登录请求，将解密后的密码发送给后端
+        axios.post('/api/login', { username: this.form.username, password: decryptedPassword })
+                .then(response => {
+                  // 处理登录成功的逻辑
+                  console.log(response.data); // 登录成功的响应数据
+                })
+                .catch(error => {
+                  // 处理登录失败的逻辑
+                  console.log(error.response.data); // 登录失败的错误信息
+                });
+      }
+    }
+    }
+
+  )
+
+</script>
+
+</html>
