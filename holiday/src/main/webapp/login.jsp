@@ -64,7 +64,7 @@
                 <span class="login-title">登录</span>
             </div>
             <div class="login-form">
-                <el-form :model="form" :rules="loginRules" ref="loginForm">
+                <el-form :model="form" :rules="loginRules" ref="loginForm" >
                     <el-form-item prop="username">
                         <el-input type="text" v-model="form.username" auto-complete="off" placeholder="请输入账号">
                             <template slot="prepend"><i style="font-size:20px" class="el-icon-user"></i></template>
@@ -77,7 +77,8 @@
                     </el-form-item>
                     <el-form-item>
                         <el-button style="width: 210px;" type="primary" @click="handleLogin" :loading="loading">登录</el-button>
-                        <el-button style="width: 110px;">注册</el-button>
+                        <el-button style="width: 110px;" @click="goToZhucePage">注册</el-button>
+
                     </el-form-item>
                 </el-form>
             </div>
@@ -85,63 +86,77 @@
     </div>
 </div>
 
-<script src="<c:url value='https://unpkg.com/vue@2/dist/vue.js'/>"></script>
-<script src="<c:url value='https://unpkg.com/element-ui/lib/index.js'/>"></script>
-<script src="<c:url value='https://unpkg.com/axios/dist/axios.min.js'/>"></script>
-<script src="<c:url value='https://unpkg.com/qs@6.11.1/dist/qs.js'/>"></script>
-
+<script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://unpkg.com/qs/dist/qs.js"></script>
 
 <script>
     new Vue({
-            el: '#app',
-            data: {
-                loading: false,
-                form: {
-                    username: '',
-                    password: ''
-                },
-                loginRules: {
-                    account: [
-                        {required: true, message: '请输入账户', trigger: 'blur'},
-                    ],
-                    password: [
-                        {required: true, message: '请输入密码', trigger: 'blur'}
-                    ]
-                }
+        el: '#app',
+        data: {
+            loading: false,
+            form: {
+                account: '',
+                username: '',
+                password: '',
+                avatar: null,
             },
-            methods: {
-                decryptPassword(password) {
-                    return password;
-                },
-                handleLogin() {
-                    // 解密密码
-                    const decryptedPassword = this.decryptPassword(this.form.password);
+            loginRules: {
+                username: [
+                    {required: true, message: '请输入账户名', trigger: 'blur'},
+                ],
+                account: [
+                    {required: true, message: '请输入账号', trigger: 'blur'},
+                ],
+                password: [
+                    {required: true, message: '请输入密码', trigger: 'blur'}
+                ]
+            },
+        },
+        methods: {
+            goToZhucePage() {
+                window.location.href = "zhuce.jsp";
+            },
+            decryptPassword(password) {
+                return password;
+            },
+            handleLogin() {
+                // 解密密码
+                const decryptedPassword = this.decryptPassword(this.form.password);
 
-                    // 创建请求数据对象，包含username和解密后的密码
-                    const requestData = {
-                        username: this.form.username,
-                        password: decryptedPassword
-                    };
+                // 创建请求数据对象，包含username和解密后的密码
+                const requestData = {
+                    username: this.form.username,
+                    password: decryptedPassword
+                };
 
-                    // 发送登录请求到服务器
-                    axios.post('<c:url value="/api/login"/>', requestData)
-                        .then(response => {
-                            // 处理登录成功
-                            console.log(response.data); // 登录成功的响应数据
-                        })
-                        .catch(error => {
-                            // 处理登录失败
-                            console.log(error.response.data); // 登录失败的错误信息
-                        });
-                }
+                // 发送登录请求到服务器
+                axios.post('<c:url value="/api/login"/>', requestData)
+                    .then(response => {
+                        // 处理登录成功
+                        console.log(response.data); // 登录成功的响应数据
+
+                        // 获取登录成功后的用户名
+                        const username = response.data;
+
+                        // 将用户名存储到本地存储或Cookie中，以便在跳转后的页面获取
+                        // 这里以使用localStorage为例
+                        localStorage.setItem('username', username);
+
+                        // 跳转到主页面
+                        window.location.href = "regedit.jsp";
+                    })
+                    .catch(error => {
+                        // 处理登录失败
+                        console.log(error.response.data); // 登录失败的错误信息
+                    });
             }
         }
 
-        );
-</script>
-</body>
 
-</html>
+        });
+</script>
 
 
 

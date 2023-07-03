@@ -2,9 +2,13 @@
         "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
         "http://java.sun.com/dtd/web-app_2_3.dtd" >
 
+
 <web-app>
+    <session-config>
+        <session-timeout>30</session-timeout> <!-- 设置会话超时时间，以分钟为单位 -->
+    </session-config>
     <welcome-file-list>
-        <welcome-file>regedit.jsp</welcome-file>
+        <welcome-file>login.jsp</welcome-file>
     </welcome-file-list>
     <display-name>Archetype Created Web Application</display-name>
     <context-param>
@@ -27,5 +31,6 @@
         <servlet-name>DispatcherServlet</servlet-name>
         <url-pattern>/</url-pattern>
     </servlet-mapping>
+
 </web-app>
 
