@@ -13,8 +13,8 @@
     <context:component-scan base-package="cn.edu.com.service"/>
     <context:component-scan base-package="cn.edu.com.dao"/>
     <mvc:annotation-driven/>
-
-
-
+    <mvc:resources location="/views/images" mapping="/images/**" />
+    <mvc:resources location="/views/css" mapping="/css/**" />
+    <mvc:resources location="/views/js" mapping="/js/**" />
 
 </beans>

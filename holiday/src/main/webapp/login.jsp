@@ -143,18 +143,17 @@
                         // 将用户名存储到本地存储或Cookie中，以便在跳转后的页面获取
                         // 这里以使用localStorage为例
                         localStorage.setItem('username', username);
-
+                        this.$message.success('登录成功');
                         // 跳转到主页面
-                        window.location.href = "regedit.jsp";
+                        window.location.href = "index.jsp";
                     })
                     .catch(error => {
                         // 处理登录失败
                         console.log(error.response.data); // 登录失败的错误信息
+                        this.$message.error('登录失败');
                     });
             }
         }
-
-
         });
 </script>
 

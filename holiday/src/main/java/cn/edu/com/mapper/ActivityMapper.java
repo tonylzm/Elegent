@@ -36,10 +36,8 @@ public interface ActivityMapper {
             "JOIN member ON activity.activityid = member.activityid\n" +
             "WHERE activity.leadername = #{username};\n")
     List<Activity> manage(String username);
-
-
-
-
+    @Select("SELECT * FROM activity")
+    List<Activity>getAllActivity();
 
 
     @Delete("DELETE FROM activity WHERE activityId = #{activityId}")
@@ -52,8 +50,5 @@ public interface ActivityMapper {
 
     @Update("UPDATE activity SET leaderName = #{leaderName}, activityName = #{activityName}, location = #{location}, startTime = #{startTime}, capacity = #{capacity} ,duration=#{duration},money=#{money}WHERE activityId = #{activityId}")
     void updateActivity(Activity activity);
-
-
-
 
 }

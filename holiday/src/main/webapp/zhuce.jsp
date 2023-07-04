@@ -158,6 +158,7 @@
                       // 注册成功的处理逻辑
                       console.log(response.data);
                       this.$message.success('注册成功');
+                      this.goToLoginPage();// 跳转到登录页面
                     })
                     .catch((error) => {
                       // 注册失败的处理逻辑

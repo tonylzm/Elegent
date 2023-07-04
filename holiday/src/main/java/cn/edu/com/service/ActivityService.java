@@ -12,6 +12,11 @@ public class ActivityService {
     @Autowired
     private ActivityMapper activityMapper;
 
+
+
+    public List<Activity> getAllActivity(){
+        return activityMapper.getAllActivity();
+    }
     public void saveActivity(Activity activity) {
         activityMapper.insertActivity(activity);
     }
@@ -54,4 +59,5 @@ public class ActivityService {
     public List<Activity> manage(String username){
         return activityMapper.manage(username);
     }
+
 }

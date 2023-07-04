@@ -5,7 +5,6 @@ import cn.edu.com.service.ActivityService;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -14,13 +13,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Path;
 import java.util.List;
 
 @RestController
@@ -28,6 +22,14 @@ public class ActivityController {
     @Autowired
     private ActivityService activityService;
 
+
+
+    @PostMapping("/getAllActivities")
+    public List<Activity> getAllActivities(@RequestBody RequestData requestData) {
+        List<Activity> activities = activityService.getAllActivity();
+        System.out.println(activities);
+        return activities;
+    }
     @PostMapping("/addActivity")
     public String addActivity(@RequestBody Activity activity) {
         // 生成活动编号和团长名称
@@ -51,23 +53,23 @@ public class ActivityController {
         // 将时间戳和随机数组合成一个唯一的 ID
         return timestamp ;
     }
-@PostMapping("/searchActivities")
-public List<Activity> searchActivities(@RequestBody RequestData requestData) {
-    String username = requestData.getUsername();
-    List<Activity> activities = activityService.getActivitiesByUsername(username);
-    System.out.println(activities);
-    return activities;
-}
-@PostMapping("/addActivitys")
-public List<Activity> addActivity(@RequestBody RequestData requestData) {
-    String username = requestData.getUsername();
-    List<Activity> activities = activityService.addActivity(username);
-    System.out.println(activities);
-    return activities;
+    @PostMapping("/searchActivities")
+    public List<Activity> searchActivities(@RequestBody RequestData requestData) {
+        String username = requestData.getUsername();
+        List<Activity> activities = activityService.getActivitiesByUsername(username);
+        System.out.println(activities);
+        return activities;
+    }
+    @PostMapping("/addActivitys")
+    public List<Activity> addActivity(@RequestBody RequestData requestData) {
+        String username = requestData.getUsername();
+        List<Activity> activities = activityService.addActivity(username);
+        System.out.println(activities);
+        return activities;
 
-}
-@PostMapping("/deleteActivity")
-public String deleteActivity(@RequestBody RequestData requestData) {
+    }
+    @PostMapping("/deleteActivity")
+    public String deleteActivity(@RequestBody RequestData requestData) {
         Long activityId = requestData.getActivityId();
         activityService.deleteActivityById(activityId);
         return "Activity deleted successfully.";
@@ -199,4 +201,6 @@ public String deleteActivity(@RequestBody RequestData requestData) {
             this.activityId = activityId;
         }
     }
+
 }
+

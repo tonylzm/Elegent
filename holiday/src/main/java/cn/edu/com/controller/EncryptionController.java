@@ -21,7 +21,7 @@ public class EncryptionController {
     @Autowired
     private UserDao userDao;
 
-    @PostMapping("/encrypt")
+    @PostMapping("/encrypt") // 用于加密密码
     public ResponseEntity<?> encryptPassword(@RequestBody Map<String, String> request) {
         String username = request.get("username");
         String password = request.get("password");

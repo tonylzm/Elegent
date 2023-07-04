@@ -6,12 +6,15 @@
 <html>
 <head>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
-          integrity="sha512-*****************" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"
-            integrity="sha384-*****************" crossorigin="anonymous"></script>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=no"/>
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
     <style type="text/css">
         body, html,
@@ -216,23 +219,22 @@
     <title>地图展示</title>
 </head>
 <body>
-<div id="map" style="position: fixed; top: 0; right: 0; bottom: 0; left: 250px; z-index: 1;"></div>
+<div id="map" style="position: fixed; z-index: 1;"></div>
 
-<div class="sidebar">
-    <div class="header"><img src="pictures/1.JPG" class="round_icon">欢迎您，<%= username %>！</div>
+<div class="sidebar" style="z-index: 2">
+    <div class="header"><img src="pictures/1.png" class="round_icon">欢迎您，<%= username %>！</div>
     <a href="#" class="active">拼团</a>
     <div class="dropdown">
         <a href="#" class="dropdown-toggle">我的活动</a>
         <div class="dropdown-content">
             <a href="#" class="dropdown-toggle" onclick="creatPopup()">我发起的拼团</a>
             <a href="#" onclick="joinPopup()">我加入的拼团</a>
-            <a href="#" onclick="managePopup()">管理拼团人员</a>
         </div>
     </div>
     <a href="#" onclick="invitePopup()">加入拼团</a>
 </div>
 
-<div id="createGroupPopup" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #fff; padding: 20px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3); border-radius: 5px; z-index: 3;">
+<div id="createGroupPopup" style="z-index: 3">
     <%--@declare id="starttime"--%><h3>发起活动</h3>
     <input type="hidden" name="activityId" id="activityId">
     <input type="hidden" name="leaderName" id="leaderName" value="<%= username %>">
@@ -263,7 +265,8 @@
     <button id="addButton" class="btn"><i class="fas fa-plus"></i></button>
 </div>
 
-<script type="text/javascript">
+
+<script type="text/javascript"> //按钮旋转
     const btn = document.querySelector('.btn');
     let rotationAngle = 0;
     btn.addEventListener('click', () => {
@@ -278,7 +281,7 @@
     var sidebar = document.querySelector('.sidebar');
     var content = document.querySelector('.content');
 
-    toggleBtn.addEventListener('click', function() {
+    toggleBtn.addEventListener('click', function() { // 绑定点击事件
         if (sidebar.classList.contains('slide-in')) {
             sidebar.classList.remove('slide-in');
             sidebar.classList.add('slide-out');
@@ -290,9 +293,10 @@
         }
     });
 
-    function hidePopup() {
+    function hidePopup() { // 隐藏弹出框
         document.getElementById('createGroupPopup').style.display = 'none';
     }
+
     // 绑定下拉菜单点击事件
     var dropdownToggle = document.querySelector('.dropdown-toggle');
     var dropdownContent = document.querySelector('.dropdown-content');
@@ -314,12 +318,12 @@
     var navi3DCtrl = new BMapGL.NavigationControl3D();  // 添加3D控件
     map.addControl(navi3DCtrl);
 
+    // 绑定添加按钮点击事件
     var addButtonClicked = false;
     var addButton = document.querySelector('#addButton'); // 获取添加按钮
     addButton.addEventListener('click', function() { // 绑定点击事件
         addButtonClicked = !addButtonClicked; // 切换按钮状态
     });
-
 
     map.addEventListener('dblclick', function (e) {
         if (addButtonClicked) {
@@ -339,19 +343,15 @@
                 map.removeOverlay(marker);
             });
 
-            var infoWindow = new BMapGL.InfoWindow('', opts);
-
+            var infoWindow = new BMapGL.InfoWindow('', opts); // 创建信息窗口对象
             // 点标记添加点击事件
             marker.addEventListener('click', function() {
                 // 创建逆地理编码对象
                 var geocoder = new BMapGL.Geocoder();
-
                 // 根据坐标获取地址信息
                 geocoder.getLocation(point, function(result) {
                     if (result) {
                         var address = result.address; // 获取地址信息
-                        var formattedAddress = result.formattedAddress; // 获取格式化的地址信息
-
                         // 更新信息窗口内容
                         infoWindow.setContent('地址：' + address);
                         // 开启信息窗口
@@ -381,8 +381,11 @@
             alert('请先点击添加按钮!');
         }
     });
+
     // 双击地图事件处理函数
     map.addEventListener('dblclick', onMapDoubleClick);
+
+    // 双击地图事件处理函数
     function onMapDoubleClick(e) {
         // 显示创建拼团的弹窗
         var popup = document.getElementById('createGroupPopup');
@@ -457,7 +460,6 @@
                     confirmation = false;
                 }
 
-
                 // 隐藏创建拼团的弹窗
                 popup.style.display = 'none';
                 removeEventListener('click', showConfirmation)
@@ -483,7 +485,17 @@
 
         // 打开一个新的弹窗
         popupWindow = window.open('', '_blank', 'width=400,height=300,left=' + leftPosition + ',top=' + topPosition);
-        popupWindow.document.write('<html><body>');
+        popupWindow.document.write('<html><head><style>' +
+            'body { font-family: Arial, sans-serif; background-color: #f5f5f5; padding: 20px; }' +
+            'h1 { margin-top: 0; }' +
+            '.container { max-width: 600px; margin: 0 auto; background-color: #fff; border-radius: 5px; padding: 20px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }' +
+            'table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }' +
+            'th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }' +
+            'th { background-color: #f2f2f2; }' +
+            'button { padding: 8px 12px; border: none; background-color: #4CAF50; color: #fff; font-size: 14px; cursor: pointer; border-radius: 3px; transition: background-color 0.3s ease; }' +
+            'button:hover { background-color: #45a049; }' +
+            '</style></head><body>');
+
 
         // 创建表格元素
         var table = popupWindow.document.createElement("table");
@@ -535,28 +547,11 @@
                     });
                     var deleteCell = row.insertCell();
                     deleteCell.appendChild(deleteButton);
-
-                    // 添加一个导出按钮
-                    var exportButton = document.createElement('button');
-                    exportButton.textContent = '导出账单';
-                    exportButton.dataset.activityId = activity.activityId; // 将活动ID存储在dataset中
-                    exportButton.addEventListener('click', function() {
-                        var activityId = this.dataset.activityId; // 获取活动ID
-                        exportBill(activityId); // 调用导出方法并传递活动ID
-                    });
-                    var exportCell = row.insertCell();
-                    exportCell.appendChild(exportButton);
-
                 });
             })
             .catch(error => {
                 console.error('Error:', error);
             });
-        // 这里使用示例数据填充表格，你可以根据实际情况修改代码
-        var data = [
-
-            // ...
-        ];
 
         // 遍历数据并创建表格行
         data.forEach(function (item) {
@@ -573,33 +568,7 @@
         popupWindow.document.write('</body></html>');
     }
 
-    function exportBill(activityId) {
-        fetch('/exportToExcel', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ activityId: activityId }) // 将要编辑的活动ID发送给后端
-        })
-            .then(response => response.blob())
-            .then(blob => {
-                // 创建一个临时的URL对象
-                const url = window.URL.createObjectURL(blob);
-                // 创建一个<a>元素
-                const a = document.createElement('a');
-                // 设置下载属性
-                a.href = url;
-                a.download = 'activities.xlsx';
-                // 添加<a>元素到文档中
-                document.body.appendChild(a);
-                // 触发点击事件
-                a.click();
-                // 删除<a>元素
-                document.body.removeChild(a);
-                // 释放URL对象
-                window.URL.revokeObjectURL(url);
-            });
-    }
+
 
 
     // 编辑活动的方法
@@ -653,22 +622,7 @@
                     startTimeInput.value = activity.startTime;
                     form.appendChild(startTimeInput);
 
-                    var  capacityInput = editPopupWindow.document.createElement("input");
-                    capacityInput.type = "text";
-                    capacityInput.value = activity.capacity;
-                    form.appendChild( capacityInput);
-
-                    var moneyInput = editPopupWindow.document.createElement("input");
-                    moneyInput.type = "text";
-                    moneyInput.value = activity.money;
-                    form.appendChild(moneyInput);
-
-                    var durationInput = editPopupWindow.document.createElement("input");
-                    durationInput.type = "text";
-                    durationInput.value = activity.duration;
-                    form.appendChild(durationInput);
-
-                // 添加其他属性的输入字段
+                    // 添加其他属性的输入字段
 
                     // 创建保存按钮并添加点击事件处理程序
                     var saveButton = editPopupWindow.document.createElement('button');
@@ -680,10 +634,7 @@
                             leaderName: leaderNameInput.value,
                             activityName: activityNameInput.value,
                             location: locationInput.value,
-                            startTime: startTimeInput.value,
-                            capacity: capacityInput.value,
-                            money: moneyInput.value,
-                            duration: durationInput.value
+                            startTime: startTimeInput.value
                             // 获取其他属性的值
                         };
 
@@ -729,21 +680,21 @@
 
     // 后端删除方法
     function deleteActivity(activityId) {
-            // 向后端发送删除请求
-            fetch('/deleteActivity', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ activityId: activityId }) // 将活动 ID 以 JSON 格式发送
+        // 向后端发送删除请求
+        fetch('/deleteActivity', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ activityId: activityId }) // 将活动 ID 以 JSON 格式发送
+        })
+            //删除后刷新表单页面
+            .then(response => {
+                if (response.status === 200) {
+                    popupWindow.close();
+                    creatPopup();
+                }
             })
-                //删除后刷新表单页面
-                .then(response => {
-                    if (response.status === 200) {
-                        popupWindow.close();
-                        creatPopup();
-                    }
-                })
     }
     function closePopup() {
         if (popupWindow && !popupWindow.closed) {
@@ -752,6 +703,7 @@
     }
 
 
+    //我加入的拼团弹窗
     function joinPopup() {
         // 检查弹窗是否已打开，如果是，则先关闭
         if (popupWindow && !popupWindow.closed) {
@@ -764,190 +716,10 @@
 
         // 打开一个新的弹窗
         popupWindow = window.open('', '_blank', 'width=400,height=300,left=' + leftPosition + ',top=' + topPosition);
-
         popupWindow.document.write('<html><body>');
-        var table = popupWindow.document.createElement("table");
-
-        // 在表格中添加表头
-        var headerRow = table.insertRow();
-        var headerCell1 = headerRow.insertCell();
-        headerCell1.textContent = "项目编号";
-        var headerCell2 = headerRow.insertCell();
-        headerCell2.textContent = "项目名称";
-
-        // 使用 fetch 发送请求向后端获取数据
-        fetch('/JoinActivities', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({username: '<%= username %>'}) // 将数据以 JSON 格式发送
-        })
-            .then(response => response.json())
-            .then(data => {
-                // 在弹窗中填充从后端获取的数据
-                data.forEach(function (activity) {
-                    var row = table.insertRow();
-                    var cell1 = row.insertCell();
-                    cell1.textContent = activity.activityId;
-                    var cell2 = row.insertCell();
-                    cell2.textContent = activity.activityName;
-
-                    // 添加退出团队按钮
-                    var quitButton = popupWindow.document.createElement('button');
-                    quitButton.textContent = '退出团队';
-                    quitButton.dataset.activityId = activity.activityId; // 将活动 ID 存储在 dataset 中
-                    quitButton.addEventListener('click', function () {
-                        var activityId = this.dataset.activityId; // 获取活动ID
-                        quitTeam(activityId); // 调用退出团队方法，并传递活动 ID
-                    });
-                    var quitCell = row.insertCell();
-                    quitCell.appendChild(quitButton);
-
-
-                    // 添加导出按钮
-                    var exportButton = popupWindow.document.createElement('button');
-                    exportButton.textContent = '导出账单';
-                    exportButton.dataset.activityId = activity.activityId; // 将活动ID存储在dataset中
-                    exportButton.addEventListener('click', function () {
-                        var activityId = this.dataset.activityId; // 获取活动ID
-                        exportBill(activityId); // 调用导出方法并传递活动ID
-                    });
-                    var exportCell = row.insertCell();
-                    exportCell.appendChild(exportButton);
-                });  // 将表格添加到弹窗的<body>中
-                popupWindow.document.body.appendChild(table);
-
-                popupWindow.document.write('</body></html>');
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-    }
-
-        function closePopup() {
-        if (popupWindow && !popupWindow.closed) {
-            popupWindow.close();
-        }
-    }
-    function quitTeam(activityId) {
-        // 向后端发送请求，执行退出团队操作
-        fetch('/QuitTeam', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ activityId: activityId,
-                username: '<%= username %>'})
-        })
-            .then(response => response.json())
-            .then(data => {
-                popupWindow.close();
-                joinPopup();
-                console.log('退出团队成功');
-                // 这里可以根据需要进行其他操作，例如刷新表格或重新加载数据
-            })
-            .catch(error => {
-                console.error('退出团队失败:', error);
-                // 处理退出团队失败的逻辑
-            });
-    }
-
-    //人员管理弹窗
-    function managePopup(){
-        // 检查弹窗是否已打开，如果是，则先关闭
-        if (popupWindow && !popupWindow.closed) {
-            popupWindow.close();
-        }
-
-        // 计算弹窗居中位置
-        var leftPosition = (window.innerWidth - 400) / 2;
-        var topPosition = (window.innerHeight - 300) / 2;
-
-        // 打开一个新的弹窗
-        popupWindow = window.open('', '_blank', 'width=400,height=300,left=' + leftPosition + ',top=' + topPosition);
-        popupWindow.document.write('<html><body>');
-        // 创建表格元素
-        var table = popupWindow.document.createElement("table");
-
-        // 在表格中添加表头
-        var headerRow = table.insertRow();
-        var headerCell1 = headerRow.insertCell();
-        headerCell1.textContent = "项目编号";
-        var headerCell2 = headerRow.insertCell();
-        headerCell2.textContent = "项目名称";
-        var headerCell3 = headerRow.insertCell();
-        headerCell3.textContent = "成员名称";
-
-
-
-        // 从后端获取数据并填充表格
-        // 使用 fetch 发送请求向后端获取数据
-        fetch('/manage', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ username: '<%= username %>' }) // 将数据以 JSON 格式发送
-        })
-            .then(response => response.json())
-            .then(data => {
-                // 在弹窗中填充从后端获取的数据
-                data.forEach(function(activity) {
-                    var row = table.insertRow();
-                    var cell1 = row.insertCell();
-                    cell1.textContent = activity.activityId;
-                    var cell2 = row.insertCell();
-                    cell2.textContent = activity.activityName;
-                    var cell3 = row.insertCell();
-                    cell2.textContent = activity.memberName;
-                    // 添加其他属性到表格中
-                    // 添加踢出按钮
-                    var kickButton = popupWindow.document.createElement('button');
-                    kickButton.textContent = '踢出';
-                    kickButton.dataset.activityId = activity.activityId; // 将活动 ID 存储在 dataset 中
-                    kickButton.dataset.memberName = activity.memberName; // 将用户名存储在 dataset 中
-                    kickButton.addEventListener('click', function() {
-                        var activityId = this.dataset.activityId; // 获取活动ID
-                        var memberName = this.dataset.memberName; // 获取用户名
-                        kickOutUser(activityId, memberName); // 调用踢出用户方法，并传递活动 ID 和用户名
-                    });
-                    var kickCell = row.insertCell();
-                    kickCell.appendChild(kickButton);
-
-                });
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        // 将表格添加到弹窗中
-        popupWindow.document.body.appendChild(table);
-
+        popupWindow.document.write('<h1>欢迎你加入！</h1>');
         popupWindow.document.write('</body></html>');
-
     }
-
-    function kickOutUser(activityId, memberName) {
-        // 使用 fetch 发送请求向后端执行删除操作
-        fetch('/QuitTeam', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ activityId: activityId, username: memberName }) // 将活动ID和用户名以JSON格式发送
-        })
-            .then(response => response.json())
-            .then(data => {
-                popupWindow.close();
-                managePopup();
-                console.log('用户已成功踢出');
-                // 可以根据需要进行一些其他的操作或刷新页面
-            })
-            .catch(error => {
-                console.error('踢出用户失败:', error);
-            });
-    }
-
 
     //项目邀请弹窗
     function invitePopup() {
@@ -973,7 +745,6 @@
         var headerCell2 = headerRow.insertCell();
         headerCell2.textContent = "项目名称";
 
-
         // 从后端获取数据并填充表格
         // 使用 fetch 发送请求向后端获取数据
         fetch('/addActivitys', {
@@ -993,22 +764,26 @@
                     var cell2 = row.insertCell();
                     cell2.textContent = activity.activityName;
                     // 添加其他属性到表格中
-                    // 添加确认加入按钮
-                    var confirmButton = document.createElement('button');
-
-
-                    confirmButton.textContent = '确认加入';
-                    confirmButton.addEventListener('click', function () {
-                        confirmActivity(activity.activityId); // 调用编辑方法，并传递活动 ID
-                    });
-                    var confirmCell = row.insertCell();
-                    confirmCell.appendChild(confirmButton);
                     // 可以根据实际的Activity对象的属性来添加到表格中的对应单元格
                 });
             })
             .catch(error => {
                 console.error('Error:', error);
             });
+        // 这里使用示例数据填充表格，你可以根据实际情况修改代码
+        var data = [
+
+            // ...
+        ];
+
+        // 遍历数据并创建表格行
+        data.forEach(function (item) {
+            var row = table.insertRow();
+            var cell1 = row.insertCell();
+            cell1.textContent = item.column1;
+            var cell2 = row.insertCell();
+            cell2.textContent = item.column2;
+        });
 
         // 将表格添加到弹窗中
         popupWindow.document.body.appendChild(table);
@@ -1018,13 +793,6 @@
 
     }
 
-    function closePopup() {
-        if (popupWindow && !popupWindow.closed) {
-            popupWindow.close();
-        }
-    }
-
-
     // Toggle dropdown
     var dropdownToggle = document.querySelector('.dropdown-toggle');
     var dropdownContent = document.querySelector('.dropdown-content');
@@ -1033,34 +801,7 @@
         dropdownContent.style.display = (dropdownContent.style.display === 'block') ? 'none' : 'block';
     });
 
-    var popupWindow;
-    function confirmActivity(activityId) {
-        fetch('/joinActivity', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                activityId: activityId,
-                username: '<%= username %>'
-            })
-        })
-            .then(response => {
-                if (response.ok) {
-                    popupWindow.close();
-                    invitePopup();
-                } else {
-                    console.error('确认加入活动失败:', response.status);
-                }
-            })
-            .catch(error => {
-                console.error('错误:', error);
-            });
-    }
-
-
-
+    // 前端JavaScript代码
 </script>
-
 </body>
 </html>
