@@ -1,6 +1,7 @@
 package cn.edu.com.controller;
 
-import cn.edu.com.dao.Activity;
+import cn.edu.com.entity.Activity;
+import cn.edu.com.service.ActivityService;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,12 +38,12 @@ public class ActivityController {
         // 使用当前时间戳作为基础
         long timestamp = System.currentTimeMillis();
 
-        // 生成一个随机数或其他唯一标识符
-        // 这里使用 Math.random() 生成一个 6 位数的随机数，你也可以根据需求选择其他方式生成唯一标识符
-        int random = (int) (Math.random() * 900000) + 100000;
+//        // 生成一个随机数或其他唯一标识符
+//        // 这里使用 Math.random() 生成一个 6 位数的随机数，你也可以根据需求选择其他方式生成唯一标识符
+//        int random = (int) (Math.random() * 900000) + 100000;
 
         // 将时间戳和随机数组合成一个唯一的 ID
-        return timestamp * 1000000 + random;
+        return timestamp ;
     }
 @PostMapping("/searchActivities")
 public List<Activity> searchActivities(@RequestBody RequestData requestData) {
@@ -51,7 +52,33 @@ public List<Activity> searchActivities(@RequestBody RequestData requestData) {
     System.out.println(activities);
     return activities;
 }
+@PostMapping("/addActivitys")
+public List<Activity> addActivity(@RequestBody RequestData requestData) {
+    String username = requestData.getUsername();
+    List<Activity> activities = activityService.addActivity(username);
+    System.out.println(activities);
+    return activities;
 
+}
+@PostMapping("/deleteActivity")
+public String deleteActivity(@RequestBody RequestData requestData) {
+        Long activityId = requestData.getActivityId();
+        activityService.deleteActivityById(activityId);
+        return "Activity deleted successfully.";
+    }
+
+    @PostMapping("/getActivity")
+    public List<Activity> getActivity(@RequestBody RequestData requestData) {
+        Long activityId = requestData.getActivityId();
+        List<Activity> activities=activityService.getActivityById(activityId);
+        System.out.println(activities);
+        return activities;
+    }
+    @PostMapping("/updateActivity")
+    public String updateActivity(@RequestBody Activity activity) {
+        activityService.updateActivity(activity);
+        return "Activity updated successfully.";
+    }
     @PostMapping(value = "/exportActivitiesToExcel", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public ResponseEntity<byte[]> exportActivitiesToExcel(@RequestBody RequestData requestData) throws IOException {
         // 查询数据库获取对应用户名下的活动列表
@@ -98,13 +125,19 @@ public List<Activity> searchActivities(@RequestBody RequestData requestData) {
     // 内部类用于接收前端发送的JSON数据
     private static class RequestData {
         private String username;
+        private Long activityId;
 
         public String getUsername() {
             return username;
         }
-
+        public Long getActivityId() {
+            return activityId;
+        }
         public void setUsername(String username) {
             this.username = username;
+        }
+        public void setActivityId(Long activityId) {
+            this.activityId = activityId;
         }
     }
 }

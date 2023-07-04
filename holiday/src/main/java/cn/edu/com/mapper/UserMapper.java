@@ -1,6 +1,6 @@
 package cn.edu.com.mapper;
 
-import cn.edu.com.dao.User;
+import cn.edu.com.entity.User;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;

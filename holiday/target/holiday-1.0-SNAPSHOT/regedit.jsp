@@ -65,22 +65,6 @@
             padding: 16px;
         }
 
-        /* Content */
-        .content {
-            margin-left: 250px;
-            padding: 16px;
-        }
-
-        /* Toggle button */
-        .toggle-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 30px;
-            cursor: pointer;
-            color: #555;
-        }
-
         /* Animation */
         @keyframes slide-in {
             from { transform: translateX(-100%); }
@@ -155,6 +139,78 @@
             background-color: #818a81; /* 新的悬停背景颜色 */
         }
 
+        #createGroupPopup {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+            z-index: 3;
+            width: 300px;
+            font-family: "Helvetica Neue", Arial, sans-serif;
+        }
+
+        #createGroupPopup h3 {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            color: #333;
+        }
+
+        #createGroupPopup div {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #createGroupPopup label {
+            font-size: 18px;
+            margin-bottom: 10px;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            color: #333;
+        }
+
+        #createGroupPopup input {
+            font-size: 16px;
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-bottom: 20px;
+            width: 100%; /* Adjust the width as desired */
+            font-family: "Helvetica Neue", Arial, sans-serif;
+        }
+
+        #createGroupPopup button {
+            display: inline-block;
+            background-color: #84cd86;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease; /* Add transition effect */
+            font-family: "Helvetica Neue", Arial, sans-serif;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        #createGroupPopup button:hover {
+            background-color: #68a567; /* Change background color on hover */
+        }
+
+        #createGroupPopup button + button {
+            background-color: #e9675e;
+            margin-left: 10px; /* Add spacing between buttons */
+        }
+
     </style>
     <script type="text/javascript" src="https://api.map.baidu.com/api?type=webgl&v=1.0&ak=VxXMwTrk3B9lrfDkxRFRvnvUXx1Wq1cy"></script>
     <title>地图展示</title>
@@ -172,28 +228,35 @@
             <a href="#" onclick="joinPopup()">我加入的拼团</a>
         </div>
     </div>
-    <a href="#" onclick="invitePopup()">项目邀请</a>
+    <a href="#" onclick="invitePopup()">加入拼团</a>
 </div>
+
 <div id="createGroupPopup" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #fff; padding: 20px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3); border-radius: 5px; z-index: 3;">
-    <h3>发起活动</h3>
+    <%--@declare id="starttime"--%><h3>发起活动</h3>
     <input type="hidden" name="activityId" id="activityId">
-    <label for="leaderName">团长名称：</label>
-    <input type="text" name="leaderName" id="leaderName" readonly value="<%= username %>">
+    <input type="hidden" name="leaderName" id="leaderName" value="<%= username %>">
     <br>
     <label for="activityName">活动内容:</label>
     <input type="text" id="activityName">
     <br>
-    <label for="location">活动地点：</label>
-    <input type="text" name="location" id="location">
+    <input type="hidden" name="location" id="location" >
+    <input type="hidden" name="lng" id="lng" >
+    <input type="hidden" name="lat" id="lat" >
     <br>
-    <label for="startTime">活动时间:</label>
-    <input type="text" id="startTime">
+    <label for="startTime">活动时间：</label>
+    <input type="datetime-local" id="startTime">
     <br>
     <label for="capacity">活动人数:</label>
     <input type="number" id="capacity">
     <br>
-    <button onclick="showConfirmation()">创建</button>
-    <button onclick="hidePopup()">退出</button>
+    <label for="duration">持续时间:</label>
+    <input type="text" id="duration">
+    <br>
+    <label for="money">活动费用:</label>
+    <input type="text" id="money">
+    <br>
+    <button  onclick="showConfirmation()">创建</button>
+    <button  onclick="hidePopup()">退出</button>
 </div>
 <div>
     <button id="addButton" class="btn"><i class="fas fa-plus"></i></button>
@@ -209,7 +272,7 @@
 </script>
 
 <script type="text/javascript">
-    // Toggle sidebar
+    // 侧边栏
     var toggleBtn = document.querySelector('.toggle-btn');
     var sidebar = document.querySelector('.sidebar');
     var content = document.querySelector('.content');
@@ -229,6 +292,13 @@
     function hidePopup() {
         document.getElementById('createGroupPopup').style.display = 'none';
     }
+    // 绑定下拉菜单点击事件
+    var dropdownToggle = document.querySelector('.dropdown-toggle');
+    var dropdownContent = document.querySelector('.dropdown-content');
+
+    dropdownToggle.addEventListener('click', function() { // 绑定点击事件
+        dropdownContent.style.display = (dropdownContent.style.display === 'block') ? 'none' : 'block';
+    });
 </script>
 
 <script type="text/javascript">
@@ -237,34 +307,30 @@
     var map = new BMapGL.Map("map");    // 创建Map实例
     map.centerAndZoom('苏州市', 12);  // 初始化地图,设置中心点坐标和地图级别
     map.enableScrollWheelZoom(true);     //开启鼠标滚轮缩放
+    map.disableDoubleClickZoom(); // 禁用双击放大
     var scaleCtrl = new BMapGL.ScaleControl();  // 添加比例尺控件
     map.addControl(scaleCtrl);
     var navi3DCtrl = new BMapGL.NavigationControl3D();  // 添加3D控件
     map.addControl(navi3DCtrl);
-    var addButtonClicked = false;
-    var addButton = document.getElementById('addButton');
 
-    addButton.addEventListener('click', function () {
-        if (addButtonClicked) {
-            addButtonClicked = false;
-        } else {
-            addButtonClicked = true;
-        }
+    var addButtonClicked = false;
+    var addButton = document.querySelector('#addButton'); // 获取添加按钮
+    addButton.addEventListener('click', function() { // 绑定点击事件
+        addButtonClicked = !addButtonClicked; // 切换按钮状态
     });
+
+
     map.addEventListener('dblclick', function (e) {
         if (addButtonClicked) {
             // 创建点标记
             var point = new BMapGL.Point(e.latlng.lng, e.latlng.lat);
             var marker = new BMapGL.Marker(point);
-
             // 添加点标记
             map.addOverlay(marker);
-
             // 创建信息窗口
             var opts = {
                 width: 200,
                 height: 100,
-                title: '垃圾分类志愿者'
             };
 
             // 右键删除点标记
@@ -289,13 +355,119 @@
                         infoWindow.setContent('地址：' + address);
                         // 开启信息窗口
                         map.openInfoWindow(infoWindow, point);
+                        // 更新隐藏输入框的值
+                        var locationInput = document.getElementById('location');
+                        locationInput.value = address;
                     }
                 });
+            });
+            // 更新隐藏输入框的值
+            var lngInput = document.getElementById('lng'); // 获取经度输入框
+            var latInput = document.getElementById('lat'); // 获取纬度输入框
+            lngInput.value = e.latlng.lng; // 将经度值传递到隐藏输入框
+            latInput.value = e.latlng.lat; // 将纬度值传递到隐藏输入框
+            // 创建逆地理编码对象
+            var geocoder = new BMapGL.Geocoder();
+            geocoder.getLocation(point, function(result) {
+                if (result) {
+                    var address = result.address; // 获取地址信息
+                    // 更新隐藏输入框的值
+                    var locationInput = document.getElementById('location');
+                    locationInput.value = address;
+                }
             });
         }else {
             alert('请先点击添加按钮!');
         }
     });
+    // 双击地图事件处理函数
+    map.addEventListener('dblclick', onMapDoubleClick);
+    function onMapDoubleClick(e) {
+        // 显示创建拼团的弹窗
+        var popup = document.getElementById('createGroupPopup');
+        if (addButtonClicked) {
+            popup.style.display = 'block'; // 显示弹窗
+
+            var confirmation = true;
+            // 创建按钮点击事件处理函数
+            function showConfirmation() { // 显示确认弹窗
+                var activityId = document.getElementById("activityId").value;
+                var leaderName = document.getElementById("leaderName").value;
+                var activityName = document.getElementById("activityName").value;
+                var location = document.getElementById("location").value;
+                var startTime = document.getElementById("startTime").value;
+                var capacity = document.getElementById("capacity").value;
+                var duration = document.getElementById("duration").value;
+                var money = document.getElementById("money").value;
+                var lng = document.getElementById("lng").value;
+                var lat = document.getElementById("lat").value;
+
+                if (confirmation) {
+                    // 在此处可以将拼团信息提交到后端进行处理
+                    var params = {
+                        activityId: activityId,
+                        leaderName: leaderName,
+                        activityName: activityName,
+                        location: location,
+                        startTime: startTime,
+                        duration: duration,
+                        capacity: capacity,
+                        money: money,
+                        lng: lng,
+                        lat: lat
+                    };
+                    // 发送POST请求到后端
+                    var xhr = new XMLHttpRequest();
+                    xhr.open("POST", "/addActivity", true);
+                    xhr.setRequestHeader("Content-type", "application/json");
+                    xhr.onreadystatechange = function () {
+                        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+                            // 请求成功，处理响应
+                            var response = JSON.parse(xhr.responseText);
+                            // 根据需要执行相应的操作
+                            console.log(response);
+                        }
+                    };
+                    xhr.send(JSON.stringify(params));
+                    // 创建拼团信息标记
+                    var point = new BMapGL.Point(lng, lat);
+                    var marker = new BMapGL.Marker(point);
+                    // Add marker to map if addButton is clicked
+                    if (addButton.clicked) {
+                        map.addOverlay(marker);
+                    }
+
+                    var infoWindowContent = '<div style="width: 200px;">';
+                    infoWindowContent += '<h4 style="margin: 5px;">' + activityName + '</h4>';
+                    infoWindowContent += '<p style="margin: 5px;">活动时间: ' + startTime + '</p>';
+                    infoWindowContent += '<p style="margin: 5px;">最大人数限制: ' + capacity + '</p>';
+                    infoWindowContent += '<p style="margin: 5px;">活动地点: ' + location + '</p>';
+
+                    infoWindowContent += '</div>';
+                    var infoWindowOptions = {
+                        width: 200,
+                        height: 150,
+                        title: activityName,
+                    };
+                    var infoWindow = new BMapGL.InfoWindow(infoWindowContent, infoWindowOptions);
+                    marker.addEventListener('click', function () {
+                        map.openInfoWindow(infoWindow, point);
+                    });
+                    confirmation = false;
+                }
+
+
+                // 隐藏创建拼团的弹窗
+                popup.style.display = 'none';
+                removeEventListener('click', showConfirmation)
+            }
+
+            // 绑定创建按钮点击事件
+            var createButton = document.querySelector('#createGroupPopup button');
+            createButton.addEventListener('click', showConfirmation);
+        }
+    }
+
     var popupWindow;
     //我发起的拼团弹窗
     function creatPopup() {
@@ -311,7 +483,6 @@
         // 打开一个新的弹窗
         popupWindow = window.open('', '_blank', 'width=400,height=300,left=' + leftPosition + ',top=' + topPosition);
         popupWindow.document.write('<html><body>');
-        popupWindow.document.write('<h1>欢迎团长！</h1>');
 
         // 创建表格元素
         var table = popupWindow.document.createElement("table");
@@ -319,13 +490,277 @@
         // 在表格中添加表头
         var headerRow = table.insertRow();
         var headerCell1 = headerRow.insertCell();
-        headerCell1.textContent = "列1";
+        headerCell1.textContent = "项目编号";
         var headerCell2 = headerRow.insertCell();
-        headerCell2.textContent = "列2";
+        headerCell2.textContent = "项目名称";
 
         // 从后端获取数据并填充表格
         // 使用 fetch 发送请求向后端获取数据
         fetch('/searchActivities', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username: '<%= username %>' }) // 将数据以 JSON 格式发送
+        })
+            .then(response => response.json())
+            .then(data => {
+                // 在弹窗中填充从后端获取的数据
+                data.forEach(function(activity) {
+                    var row = table.insertRow();
+                    var cell1 = row.insertCell();
+                    cell1.textContent = activity.activityId;
+                    var cell2 = row.insertCell();
+                    cell2.textContent = activity.activityName;
+                    // 添加其他属性到表格中
+
+                    // 可以根据实际的Activity对象的属性来添加到表格中的对应单元格
+                    // 添加编辑按钮
+                    var editButton = document.createElement('button');
+                    editButton.textContent = '编辑';
+                    editButton.addEventListener('click', function () {
+                        editActivity(activity.activityId); // 调用编辑方法，并传递活动 ID
+                    });
+                    var editCell = row.insertCell();
+                    editCell.appendChild(editButton);
+
+                    // 添加删除按钮
+                    var deleteButton = document.createElement('button');
+                    deleteButton.textContent = '删除';
+                    deleteButton.dataset.activityId = activity.activityId; // 将活动 ID 存储在 dataset 中
+                    deleteButton.addEventListener('click', function() {
+                        var activityId = this.dataset.activityId; // 获取活动ID
+                        deleteActivity(activityId); // 调用删除方法，并传递活动 ID
+                    });
+                    var deleteCell = row.insertCell();
+                    deleteCell.appendChild(deleteButton);
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        // 这里使用示例数据填充表格，你可以根据实际情况修改代码
+        var data = [
+
+            // ...
+        ];
+
+        // 遍历数据并创建表格行
+        data.forEach(function (item) {
+            var row = table.insertRow();
+            var cell1 = row.insertCell();
+            cell1.textContent = item.column1;
+            var cell2 = row.insertCell();
+            cell2.textContent = item.column2;
+        });
+
+        // 将表格添加到弹窗中
+        popupWindow.document.body.appendChild(table);
+
+        popupWindow.document.write('</body></html>');
+    }
+
+
+    // 编辑活动的方法
+    function editActivity(activityId) {
+
+        var leftPosition = (window.innerWidth - 400) / 2;
+        var topPosition = (window.innerHeight - 300) / 2;
+        // 创建一个新的弹窗
+        var editPopupWindow = window.open('', '_blank', 'width=400,height=300,left=' + leftPosition + ',top=' + topPosition);
+        editPopupWindow.document.write('<html><body>');
+
+        // 创建表单元素
+        var form = editPopupWindow.document.createElement("form");
+
+        // 从后端获取数据并填充表单
+        fetch('/getActivity', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ activityId: activityId }) // 将要编辑的活动ID发送给后端
+        })
+            .then(response => response.json())
+            .then(data => {
+                // 将数据填充到表单中
+                data.forEach(function(activity) {
+                    var form = editPopupWindow.document.createElement("form");
+
+                    var activityIdInput = editPopupWindow.document.createElement("input");
+                    activityIdInput.type = "text";
+                    activityIdInput.value = activity.activityId;
+                    form.appendChild(activityIdInput);
+
+                    var leaderNameInput = editPopupWindow.document.createElement("input");
+                    leaderNameInput.type = "text";
+                    leaderNameInput.value = activity.leaderName;
+                    form.appendChild(leaderNameInput);
+
+                    var activityNameInput = editPopupWindow.document.createElement("input");
+                    activityNameInput.type = "text";
+                    activityNameInput.value = activity.activityName;
+                    form.appendChild(activityNameInput);
+
+                    var locationInput = editPopupWindow.document.createElement("input");
+                    locationInput.type = "text";
+                    locationInput.value = activity.location;
+                    form.appendChild(locationInput);
+
+                    var startTimeInput = editPopupWindow.document.createElement("input");
+                    startTimeInput.type = "text";
+                    startTimeInput.value = activity.startTime;
+                    form.appendChild(startTimeInput);
+
+                    var  capacityInput = editPopupWindow.document.createElement("input");
+                    capacityInput.type = "text";
+                    capacityInput.value = activity.capacity;
+                    form.appendChild( capacityInput);
+
+                    var moneyInput = editPopupWindow.document.createElement("input");
+                    moneyInput.type = "text";
+                    moneyInput.value = activity.money;
+                    form.appendChild(moneyInput);
+
+                    var durationInput = editPopupWindow.document.createElement("input");
+                    durationInput.type = "text";
+                    durationInput.value = activity.duration;
+                    form.appendChild(durationInput);
+
+                // 添加其他属性的输入字段
+
+                    // 创建保存按钮并添加点击事件处理程序
+                    var saveButton = editPopupWindow.document.createElement('button');
+                    saveButton.textContent = '保存';
+                    saveButton.addEventListener('click', function () {
+                        // 获取表单数据
+                        var editedData = {
+                            activityId: activityIdInput.value,
+                            leaderName: leaderNameInput.value,
+                            activityName: activityNameInput.value,
+                            location: locationInput.value,
+                            startTime: startTimeInput.value,
+                            capacity: capacityInput.value,
+                            money: moneyInput.value,
+                            duration: durationInput.value
+                            // 获取其他属性的值
+                        };
+
+                        // 将编辑后的数据发送到后端进行更新
+                        fetch('/updateActivity', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(editedData)
+                        })
+                            .then(response => {
+                                // 处理保存成功后的逻辑
+                                // 关闭弹窗等操作
+                                editPopupWindow.close(); // 关闭表单弹窗
+                                popupWindow.close();
+                                creatPopup();
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                            });
+                    });
+
+                    form.appendChild(saveButton);
+
+                    editPopupWindow.document.body.appendChild(form);
+                });
+
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+
+        // 将表单添加到弹窗中
+        editPopupWindow.document.body.appendChild(form);
+
+        editPopupWindow.document.write('</body></html>');
+    }
+
+
+    // 在弹窗中创建表格的代码
+
+
+    // 后端删除方法
+    function deleteActivity(activityId) {
+            // 向后端发送删除请求
+            fetch('/deleteActivity', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ activityId: activityId }) // 将活动 ID 以 JSON 格式发送
+            })
+                //删除后刷新表单页面
+                .then(response => {
+                    if (response.status === 200) {
+                        popupWindow.close();
+                        creatPopup();
+                    }
+                })
+    }
+    function closePopup() {
+        if (popupWindow && !popupWindow.closed) {
+            popupWindow.close();
+        }
+    }
+
+
+    //我加入的拼团弹窗
+    function joinPopup() {
+        // 检查弹窗是否已打开，如果是，则先关闭
+        if (popupWindow && !popupWindow.closed) {
+            popupWindow.close();
+        }
+
+        // 计算弹窗居中位置
+        var leftPosition = (window.innerWidth - 400) / 2;
+        var topPosition = (window.innerHeight - 300) / 2;
+
+        // 打开一个新的弹窗
+        popupWindow = window.open('', '_blank', 'width=400,height=300,left=' + leftPosition + ',top=' + topPosition);
+        popupWindow.document.write('<html><body>');
+        popupWindow.document.write('<h1>欢迎你加入！</h1>');
+        popupWindow.document.write('</body></html>');
+    }
+
+    function closePopup() {
+        if (popupWindow && !popupWindow.closed) {
+            popupWindow.close();
+        }
+    }
+    //项目邀请弹窗
+    function invitePopup() {
+        // 检查弹窗是否已打开，如果是，则先关闭
+        if (popupWindow && !popupWindow.closed) {
+            popupWindow.close();
+        }
+
+        // 计算弹窗居中位置
+        var leftPosition = (window.innerWidth - 400) / 2;
+        var topPosition = (window.innerHeight - 300) / 2;
+
+        // 打开一个新的弹窗
+        popupWindow = window.open('', '_blank', 'width=400,height=300,left=' + leftPosition + ',top=' + topPosition);
+        popupWindow.document.write('<html><body>');
+        // 创建表格元素
+        var table = popupWindow.document.createElement("table");
+
+        // 在表格中添加表头
+        var headerRow = table.insertRow();
+        var headerCell1 = headerRow.insertCell();
+        headerCell1.textContent = "项目编号";
+        var headerCell2 = headerRow.insertCell();
+        headerCell2.textContent = "项目名称";
+
+        // 从后端获取数据并填充表格
+        // 使用 fetch 发送请求向后端获取数据
+        fetch('/addActivitys', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -368,52 +803,8 @@
         popupWindow.document.body.appendChild(table);
 
         popupWindow.document.write('</body></html>');
-    }
 
-    function closePopup() {
-        if (popupWindow && !popupWindow.closed) {
-            popupWindow.close();
-        }
-    }
-    //我加入的拼团弹窗
-    function joinPopup() {
-        // 检查弹窗是否已打开，如果是，则先关闭
-        if (popupWindow && !popupWindow.closed) {
-            popupWindow.close();
-        }
 
-        // 计算弹窗居中位置
-        var leftPosition = (window.innerWidth - 400) / 2;
-        var topPosition = (window.innerHeight - 300) / 2;
-
-        // 打开一个新的弹窗
-        popupWindow = window.open('', '_blank', 'width=400,height=300,left=' + leftPosition + ',top=' + topPosition);
-        popupWindow.document.write('<html><body>');
-        popupWindow.document.write('<h1>欢迎你加入！</h1>');
-        popupWindow.document.write('</body></html>');
-    }
-
-    function closePopup() {
-        if (popupWindow && !popupWindow.closed) {
-            popupWindow.close();
-        }
-    }
-    //项目邀请弹窗
-    function invitePopup() {
-        // 检查弹窗是否已打开，如果是，则先关闭
-        if (popupWindow && !popupWindow.closed) {
-            popupWindow.close();
-        }
-
-        // 计算弹窗居中位置
-        var leftPosition = (window.innerWidth - 400) / 2;
-        var topPosition = (window.innerHeight - 300) / 2;
-
-        // 打开一个新的弹窗
-        popupWindow = window.open('', '_blank', 'width=400,height=300,left=' + leftPosition + ',top=' + topPosition);
-        popupWindow.document.write('<html><body>');
-        popupWindow.document.write('<h1>你想邀请谁？</h1>');
-        popupWindow.document.write('</body></html>');
     }
 
     function closePopup() {
@@ -430,87 +821,13 @@
     dropdownToggle.addEventListener('click', function() {
         dropdownContent.style.display = (dropdownContent.style.display === 'block') ? 'none' : 'block';
     });
+
+
     // 双击地图事件处理函数
-    function onMapDoubleClick(e) {
-        // 获取双击的地理坐标
-        var lng = e.point.lng;
-        var lat = e.point.lat;
 
-        // 显示创建拼团的弹窗
-        var popup = document.getElementById('createGroupPopup');
-        popup.style.display = 'block';
+    var popupWindow;
 
-        // 创建按钮点击事件处理函数
-        function showConfirmation() {
-            var activityId = document.getElementById("activityId").value;
-            var leaderName = document.getElementById("leaderName").value;
-            var activityName = document.getElementById("activityName").value;
-            var location = document.getElementById("location").value;
-            var startTime = document.getElementById("startTime").value;
-            var capacity = document.getElementById("capacity").value;
 
-            var confirmation = confirm("是否确认发起拼团？");
-            if (confirmation) {
-                // 在此处可以将拼团信息提交到后端进行处理
-                var params = {
-                    activityId: activityId,
-                    leaderName: leaderName,
-                    activityName: activityName,
-                    location: location,
-                    startTime: startTime,
-                    capacity: capacity
-                };
-                // 发送POST请求到后端
-                var xhr = new XMLHttpRequest();
-                xhr.open("POST", "/addActivity", true);
-                xhr.setRequestHeader("Content-type", "application/json");
-                xhr.onreadystatechange = function() {
-                    if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-                        // 请求成功，处理响应
-                        var response = JSON.parse(xhr.responseText);
-                        // 根据需要执行相应的操作
-                        console.log(response);
-                    }
-                };
-                xhr.send(JSON.stringify(params));
-                // 创建拼团信息标记
-                var point = new BMapGL.Point(lng, lat);
-                var marker = new BMapGL.Marker(point);
-                // Add marker to map if addButton is clicked
-                if (addButton.clicked) {
-                    map.addOverlay(marker);
-                }
-
-                var infoWindowContent = '<div style="width: 200px;">';
-                infoWindowContent += '<h4 style="margin: 5px;">' + activityName + '</h4>';
-                infoWindowContent += '<p style="margin: 5px;">活动时间: ' + startTime + '</p>';
-                infoWindowContent += '<p style="margin: 5px;">最大人数限制: ' + capacity + '</p>';
-                infoWindowContent += '</div>';
-                var infoWindowOptions = {
-                    width: 200,
-                    height: 150,
-                    title: activityName,
-                };
-                var infoWindow = new BMapGL.InfoWindow(infoWindowContent, infoWindowOptions);
-                marker.addEventListener('click', function() {
-                    map.openInfoWindow(infoWindow, point);
-                });
-            }
-
-            // 隐藏创建拼团的弹窗
-            popup.style.display = 'none';
-        }
-        // 绑定创建按钮点击事件
-        var createButton = document.querySelector('#createGroupPopup button');
-        createButton.addEventListener('click', showConfirmation);
-    }
-
-    // 绑定添加按钮点击事件
-    var addButton = document.querySelector('#addButton');
-    addButton.addEventListener('click', function() {
-        addButton.clicked = true;
-        map.addEventListener('dblclick', onMapDoubleClick);
-    });
     // 前端JavaScript代码
 
 </script>
