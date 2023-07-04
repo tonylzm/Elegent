@@ -226,6 +226,7 @@
         <div class="dropdown-content">
             <a href="#" class="dropdown-toggle" onclick="creatPopup()">我发起的拼团</a>
             <a href="#" onclick="joinPopup()">我加入的拼团</a>
+            <a href="#" onclick="managePopup()">管理拼团人员</a>
         </div>
     </div>
     <a href="#" onclick="invitePopup()">加入拼团</a>
@@ -534,6 +535,18 @@
                     });
                     var deleteCell = row.insertCell();
                     deleteCell.appendChild(deleteButton);
+
+                    // 添加一个导出按钮
+                    var exportButton = document.createElement('button');
+                    exportButton.textContent = '导出账单';
+                    exportButton.dataset.activityId = activity.activityId; // 将活动ID存储在dataset中
+                    exportButton.addEventListener('click', function() {
+                        var activityId = this.dataset.activityId; // 获取活动ID
+                        exportBill(activityId); // 调用导出方法并传递活动ID
+                    });
+                    var exportCell = row.insertCell();
+                    exportCell.appendChild(exportButton);
+
                 });
             })
             .catch(error => {
@@ -558,6 +571,34 @@
         popupWindow.document.body.appendChild(table);
 
         popupWindow.document.write('</body></html>');
+    }
+
+    function exportBill(activityId) {
+        fetch('/exportToExcel', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ activityId: activityId }) // 将要编辑的活动ID发送给后端
+        })
+            .then(response => response.blob())
+            .then(blob => {
+                // 创建一个临时的URL对象
+                const url = window.URL.createObjectURL(blob);
+                // 创建一个<a>元素
+                const a = document.createElement('a');
+                // 设置下载属性
+                a.href = url;
+                a.download = 'activities.xlsx';
+                // 添加<a>元素到文档中
+                document.body.appendChild(a);
+                // 触发点击事件
+                a.click();
+                // 删除<a>元素
+                document.body.removeChild(a);
+                // 释放URL对象
+                window.URL.revokeObjectURL(url);
+            });
     }
 
 
@@ -711,7 +752,6 @@
     }
 
 
-    //我加入的拼团弹窗
     function joinPopup() {
         // 检查弹窗是否已打开，如果是，则先关闭
         if (popupWindow && !popupWindow.closed) {
@@ -724,16 +764,191 @@
 
         // 打开一个新的弹窗
         popupWindow = window.open('', '_blank', 'width=400,height=300,left=' + leftPosition + ',top=' + topPosition);
+
         popupWindow.document.write('<html><body>');
-        popupWindow.document.write('<h1>欢迎你加入！</h1>');
-        popupWindow.document.write('</body></html>');
+        var table = popupWindow.document.createElement("table");
+
+        // 在表格中添加表头
+        var headerRow = table.insertRow();
+        var headerCell1 = headerRow.insertCell();
+        headerCell1.textContent = "项目编号";
+        var headerCell2 = headerRow.insertCell();
+        headerCell2.textContent = "项目名称";
+
+        // 使用 fetch 发送请求向后端获取数据
+        fetch('/JoinActivities', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({username: '<%= username %>'}) // 将数据以 JSON 格式发送
+        })
+            .then(response => response.json())
+            .then(data => {
+                // 在弹窗中填充从后端获取的数据
+                data.forEach(function (activity) {
+                    var row = table.insertRow();
+                    var cell1 = row.insertCell();
+                    cell1.textContent = activity.activityId;
+                    var cell2 = row.insertCell();
+                    cell2.textContent = activity.activityName;
+
+                    // 添加退出团队按钮
+                    var quitButton = popupWindow.document.createElement('button');
+                    quitButton.textContent = '退出团队';
+                    quitButton.dataset.activityId = activity.activityId; // 将活动 ID 存储在 dataset 中
+                    quitButton.addEventListener('click', function () {
+                        var activityId = this.dataset.activityId; // 获取活动ID
+                        quitTeam(activityId); // 调用退出团队方法，并传递活动 ID
+                    });
+                    var quitCell = row.insertCell();
+                    quitCell.appendChild(quitButton);
+
+
+                    // 添加导出按钮
+                    var exportButton = popupWindow.document.createElement('button');
+                    exportButton.textContent = '导出账单';
+                    exportButton.dataset.activityId = activity.activityId; // 将活动ID存储在dataset中
+                    exportButton.addEventListener('click', function () {
+                        var activityId = this.dataset.activityId; // 获取活动ID
+                        exportBill(activityId); // 调用导出方法并传递活动ID
+                    });
+                    var exportCell = row.insertCell();
+                    exportCell.appendChild(exportButton);
+                });  // 将表格添加到弹窗的<body>中
+                popupWindow.document.body.appendChild(table);
+
+                popupWindow.document.write('</body></html>');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
     }
 
-    function closePopup() {
+        function closePopup() {
         if (popupWindow && !popupWindow.closed) {
             popupWindow.close();
         }
     }
+    function quitTeam(activityId) {
+        // 向后端发送请求，执行退出团队操作
+        fetch('/QuitTeam', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ activityId: activityId,
+                username: '<%= username %>'})
+        })
+            .then(response => response.json())
+            .then(data => {
+                popupWindow.close();
+                joinPopup();
+                console.log('退出团队成功');
+                // 这里可以根据需要进行其他操作，例如刷新表格或重新加载数据
+            })
+            .catch(error => {
+                console.error('退出团队失败:', error);
+                // 处理退出团队失败的逻辑
+            });
+    }
+
+    //人员管理弹窗
+    function managePopup(){
+        // 检查弹窗是否已打开，如果是，则先关闭
+        if (popupWindow && !popupWindow.closed) {
+            popupWindow.close();
+        }
+
+        // 计算弹窗居中位置
+        var leftPosition = (window.innerWidth - 400) / 2;
+        var topPosition = (window.innerHeight - 300) / 2;
+
+        // 打开一个新的弹窗
+        popupWindow = window.open('', '_blank', 'width=400,height=300,left=' + leftPosition + ',top=' + topPosition);
+        popupWindow.document.write('<html><body>');
+        // 创建表格元素
+        var table = popupWindow.document.createElement("table");
+
+        // 在表格中添加表头
+        var headerRow = table.insertRow();
+        var headerCell1 = headerRow.insertCell();
+        headerCell1.textContent = "项目编号";
+        var headerCell2 = headerRow.insertCell();
+        headerCell2.textContent = "项目名称";
+        var headerCell3 = headerRow.insertCell();
+        headerCell3.textContent = "成员名称";
+
+
+
+        // 从后端获取数据并填充表格
+        // 使用 fetch 发送请求向后端获取数据
+        fetch('/manage', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username: '<%= username %>' }) // 将数据以 JSON 格式发送
+        })
+            .then(response => response.json())
+            .then(data => {
+                // 在弹窗中填充从后端获取的数据
+                data.forEach(function(activity) {
+                    var row = table.insertRow();
+                    var cell1 = row.insertCell();
+                    cell1.textContent = activity.activityId;
+                    var cell2 = row.insertCell();
+                    cell2.textContent = activity.activityName;
+                    var cell3 = row.insertCell();
+                    cell2.textContent = activity.memberName;
+                    // 添加其他属性到表格中
+                    // 添加踢出按钮
+                    var kickButton = popupWindow.document.createElement('button');
+                    kickButton.textContent = '踢出';
+                    kickButton.dataset.activityId = activity.activityId; // 将活动 ID 存储在 dataset 中
+                    kickButton.dataset.memberName = activity.memberName; // 将用户名存储在 dataset 中
+                    kickButton.addEventListener('click', function() {
+                        var activityId = this.dataset.activityId; // 获取活动ID
+                        var memberName = this.dataset.memberName; // 获取用户名
+                        kickOutUser(activityId, memberName); // 调用踢出用户方法，并传递活动 ID 和用户名
+                    });
+                    var kickCell = row.insertCell();
+                    kickCell.appendChild(kickButton);
+
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        // 将表格添加到弹窗中
+        popupWindow.document.body.appendChild(table);
+
+        popupWindow.document.write('</body></html>');
+
+    }
+
+    function kickOutUser(activityId, memberName) {
+        // 使用 fetch 发送请求向后端执行删除操作
+        fetch('/QuitTeam', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ activityId: activityId, username: memberName }) // 将活动ID和用户名以JSON格式发送
+        })
+            .then(response => response.json())
+            .then(data => {
+                popupWindow.close();
+                managePopup();
+                console.log('用户已成功踢出');
+                // 可以根据需要进行一些其他的操作或刷新页面
+            })
+            .catch(error => {
+                console.error('踢出用户失败:', error);
+            });
+    }
+
+
     //项目邀请弹窗
     function invitePopup() {
         // 检查弹窗是否已打开，如果是，则先关闭
@@ -758,6 +973,7 @@
         var headerCell2 = headerRow.insertCell();
         headerCell2.textContent = "项目名称";
 
+
         // 从后端获取数据并填充表格
         // 使用 fetch 发送请求向后端获取数据
         fetch('/addActivitys', {
@@ -777,27 +993,22 @@
                     var cell2 = row.insertCell();
                     cell2.textContent = activity.activityName;
                     // 添加其他属性到表格中
+                    // 添加确认加入按钮
+                    var confirmButton = document.createElement('button');
 
+
+                    confirmButton.textContent = '确认加入';
+                    confirmButton.addEventListener('click', function () {
+                        confirmActivity(activity.activityId); // 调用编辑方法，并传递活动 ID
+                    });
+                    var confirmCell = row.insertCell();
+                    confirmCell.appendChild(confirmButton);
                     // 可以根据实际的Activity对象的属性来添加到表格中的对应单元格
                 });
             })
             .catch(error => {
                 console.error('Error:', error);
             });
-        // 这里使用示例数据填充表格，你可以根据实际情况修改代码
-        var data = [
-
-            // ...
-        ];
-
-        // 遍历数据并创建表格行
-        data.forEach(function (item) {
-            var row = table.insertRow();
-            var cell1 = row.insertCell();
-            cell1.textContent = item.column1;
-            var cell2 = row.insertCell();
-            cell2.textContent = item.column2;
-        });
 
         // 将表格添加到弹窗中
         popupWindow.document.body.appendChild(table);
@@ -822,13 +1033,32 @@
         dropdownContent.style.display = (dropdownContent.style.display === 'block') ? 'none' : 'block';
     });
 
-
-    // 双击地图事件处理函数
-
     var popupWindow;
+    function confirmActivity(activityId) {
+        fetch('/joinActivity', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                activityId: activityId,
+                username: '<%= username %>'
+            })
+        })
+            .then(response => {
+                if (response.ok) {
+                    popupWindow.close();
+                    invitePopup();
+                } else {
+                    console.error('确认加入活动失败:', response.status);
+                }
+            })
+            .catch(error => {
+                console.error('错误:', error);
+            });
+    }
 
 
-    // 前端JavaScript代码
 
 </script>
 

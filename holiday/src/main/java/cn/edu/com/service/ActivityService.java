@@ -30,7 +30,7 @@ public class ActivityService {
         activityMapper.deleteActivityById(activityId);
     }
 
-public void updateActivity(Activity activity) {
+    public void updateActivity(Activity activity) {
         activityMapper.updateActivity(activity);
     }
 
@@ -38,4 +38,20 @@ public void updateActivity(Activity activity) {
         return activityMapper.getActivityById(activityId);
     }
 
+    public List<Activity> getMemberById(long activityId){
+        return activityMapper.getMemberById(activityId);
+    }
+    public List<Activity> getJoinActivities(String username){
+        return activityMapper.getJoinActivities(username);
+    }
+
+    public void joinActivity(long activityId,String username){
+        activityMapper.joinActivity(activityId, username);
+    }
+    public void QuitTeam(long activityId,String username){
+        activityMapper.QuitTeam(activityId, username);
+    }
+    public List<Activity> manage(String username){
+        return activityMapper.manage(username);
+    }
 }

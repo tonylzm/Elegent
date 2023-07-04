@@ -14,6 +14,7 @@ public class Activity {
     private double money;
     private double lng;
     private double lat;
+    private String memberName;
 
 
 
@@ -88,5 +89,12 @@ public void setLng(double lng) {
 
     public void setCapacity(int capacity) {
         this.capacity = capacity;
+    }
+
+    public String getMemberName() {
+        return memberName;
+    }
+    public void setMemberName(String memberName) {
+        this.memberName=memberName;
     }
 }
